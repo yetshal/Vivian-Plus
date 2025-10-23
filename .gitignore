@@ -1,0 +1,47 @@
+# =====================================
+# GLOBAL IGNORE (ambos proyectos)
+# =====================================
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.log
+*.env
+*.env.*
+.env.backup
+.idea/
+.vscode/
+*.swp
+
+# =====================================
+# LARAVEL / COMPOSER (vivian-plus-api)
+# =====================================
+
+/vivian-plus-api/vendor/
+/vivian-plus-api/node_modules/
+/vivian-plus-api/public/storage
+/vivian-plus-api/storage/*.key
+/vivian-plus-api/storage/app/public
+/vivian-plus-api/storage/debugbar
+/vivian-plus-api/storage/framework/cache
+/vivian-plus-api/storage/framework/sessions
+/vivian-plus-api/storage/framework/views
+/vivian-plus-api/storage/logs
+/vivian-plus-api/bootstrap/cache/*.php
+/vivian-plus-api/.phpunit.result.cache
+/vivian-plus-api/phpunit.xml
+/vivian-plus-api/composer.lock
+/vivian-plus-api/.env
+
+# =====================================
+# ANGULAR (vivian-plus-frontend)
+# =====================================
+
+/vivian-plus-frontend/node_modules/
+/vivian-plus-frontend/dist/
+/vivian-plus-frontend/tmp/
+/vivian-plus-frontend/out-tsc/
+/vivian-plus-frontend/.angular/cache/
+/vivian-plus-frontend/.angular/
+npm-debug.log
+yarn-error.log
