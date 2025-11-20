@@ -1,0 +1,26 @@
+/* Animación del dropdown */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.absolute.right-0 {
+  animation: slideDown 0.2s ease-out;
+}
+
+/* Efecto hover en avatar */
+button:hover .rounded-full {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* Transición suave del menú mobile */
+.md\\:hidden.pb-4 {
+  animation: slideDown 0.3s ease-out;
+}

@@ -1,0 +1,225 @@
+<div class="container-custom py-8">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex items-center justify-center py-12">
+    <div class="text-center">
+      <svg class="animate-spin h-12 w-12 text-primary-600 mx-auto" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="mt-4 text-gray-600">Cargando tarea...</p>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading && task" class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-8">
+      <div class="flex items-start space-x-4 flex-1">
+        <a routerLink="/tasks" class="text-gray-600 hover:text-gray-900 mt-1">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+        </a>
+        <div class="flex-1">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ task.titulo }}</h1>
+          <div class="flex flex-wrap items-center gap-3">
+            <span [class]="'badge text-base ' + getPriorityClass(task.prioridad)">
+              {{ getPriorityIcon(task.prioridad) }} {{ getPriorityText(task.prioridad) }}
+            </span>
+            <span [class]="'badge text-base ' + getStatusClass(task.estado)">
+              {{ getStatusText(task.estado) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex items-center space-x-2">
+        <a [routerLink]="['/tasks/edit', task.id]" class="btn btn-secondary">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          Editar
+        </a>
+        <button (click)="deleteTask()" class="btn btn-danger">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          Eliminar
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid de 2 columnas -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Columna Principal -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Descripción -->
+        <div class="card">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Descripción</h2>
+          <p *ngIf="task.descripcion" class="text-gray-700 whitespace-pre-wrap">{{ task.descripcion }}</p>
+          <p *ngIf="!task.descripcion" class="text-gray-500 italic">Sin descripción</p>
+        </div>
+
+        <!-- Enlace -->
+        <div *ngIf="task.enlace" class="card">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Enlace Relacionado</h2>
+          <a [href]="task.enlace" target="_blank" class="flex items-center text-primary-600 hover:text-primary-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+            {{ task.enlace }}
+          </a>
+        </div>
+
+        <!-- Etiquetas -->
+        <div *ngIf="task.etiquetas && task.etiquetas.length > 0" class="card">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Etiquetas</h2>
+          <div class="flex flex-wrap gap-2">
+            <span *ngFor="let etiqueta of task.etiquetas" 
+                  class="inline-flex items-center bg-primary-100 text-primary-800 px-4 py-2 rounded-full text-sm font-medium">
+              #{{ etiqueta }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Archivos -->
+        <div *ngIf="task.archivos && task.archivos.length > 0" class="card">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Archivos Adjuntos</h2>
+          <div class="space-y-3">
+            <div *ngFor="let archivo of task.archivos" 
+                 class="flex items-center justify-between bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors">
+              <div class="flex items-center space-x-3">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">{{ archivo }}</p>
+                  <p class="text-xs text-gray-500">Archivo adjunto</p>
+                </div>
+              </div>
+              <a href="#" class="text-primary-600 hover:text-primary-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Acciones Rápidas -->
+        <div class="card">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+          <div class="space-y-2">
+            <button 
+              *ngIf="task.estado !== 'completada'"
+              (click)="changeStatus('completada')"
+              class="w-full btn bg-green-600 text-white hover:bg-green-700"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Marcar como Completada
+            </button>
+            <button 
+              *ngIf="task.estado !== 'en_progreso'"
+              (click)="changeStatus('en_progreso')"
+              class="w-full btn bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              En Progreso
+            </button>
+            <button 
+              *ngIf="task.estado !== 'pendiente'"
+              (click)="changeStatus('pendiente')"
+              class="w-full btn bg-yellow-600 text-white hover:bg-yellow-700"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Marcar como Pendiente
+            </button>
+          </div>
+        </div>
+
+        <!-- Información -->
+        <div class="card">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Información</h2>
+          <div class="space-y-4">
+            <!-- Fecha de Creación -->
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Fecha de Creación</p>
+              <p class="text-sm font-medium text-gray-900">
+                {{ task.fecha_creacion | date:'dd/MM/yyyy HH:mm' }}
+              </p>
+            </div>
+
+            <!-- Fecha de Vencimiento -->
+            <div *ngIf="task.fecha_vencimiento">
+              <p class="text-sm text-gray-500 mb-1">Fecha de Vencimiento</p>
+              <p class="text-sm font-medium text-gray-900">
+                📅 {{ task.fecha_vencimiento | date:'dd/MM/yyyy' }}
+              </p>
+            </div>
+
+            <!-- Fecha de Completada -->
+            <div *ngIf="task.fecha_completada">
+              <p class="text-sm text-gray-500 mb-1">Completada el</p>
+              <p class="text-sm font-medium text-green-600">
+                ✅ {{ task.fecha_completada | date:'dd/MM/yyyy HH:mm' }}
+              </p>
+            </div>
+
+            <!-- Última Actualización -->
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Última Actualización</p>
+              <p class="text-sm font-medium text-gray-900">
+                {{ task.fecha_actualizacion | date:'dd/MM/yyyy HH:mm' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cambiar Prioridad -->
+        <div class="card">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Cambiar Prioridad</h2>
+          <div class="space-y-2">
+            <button 
+              (click)="changePriority('baja')"
+              [class.ring-2]="task.prioridad === 'baja'"
+              class="w-full btn btn-secondary justify-start"
+            >
+              🟢 Baja
+            </button>
+            <button 
+              (click)="changePriority('media')"
+              [class.ring-2]="task.prioridad === 'media'"
+              class="w-full btn btn-secondary justify-start"
+            >
+              🟡 Media
+            </button>
+            <button 
+              (click)="changePriority('alta')"
+              [class.ring-2]="task.prioridad === 'alta'"
+              class="w-full btn btn-secondary justify-start"
+            >
+              🔴 Alta
+            </button>
+            <button 
+              (click)="changePriority('urgente')"
+              [class.ring-2]="task.prioridad === 'urgente'"
+              class="w-full btn btn-secondary justify-start"
+            >
+              🔥 Urgente
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

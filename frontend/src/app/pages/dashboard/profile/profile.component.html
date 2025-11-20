@@ -1,0 +1,231 @@
+<div class="container-custom py-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Mi Perfil</h1>
+      <p class="text-gray-600 mt-2">Administra tu información personal y configuración</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex items-center justify-center py-12">
+      <div class="text-center">
+        <svg class="animate-spin h-12 w-12 text-primary-600 mx-auto" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-4 text-gray-600">Cargando perfil...</p>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div *ngIf="!isLoading && userProfile" class="space-y-6">
+      <!-- Mensajes de Éxito/Error -->
+      <div *ngIf="successMessage" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg" role="alert">
+        <p class="text-sm">{{ successMessage }}</p>
+      </div>
+
+      <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg" role="alert">
+        <p class="text-sm">{{ errorMessage }}</p>
+      </div>
+
+      <!-- Información del Usuario -->
+      <div class="card">
+        <div class="flex items-center space-x-6 mb-6 pb-6 border-b border-gray-200">
+          <div class="w-24 h-24 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+            {{ userInitials }}
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">{{ userProfile.user.nombre }}</h2>
+            <p class="text-gray-600">{{ userProfile.user.email }}</p>
+            <p class="text-sm text-gray-500 mt-1">
+              Miembro desde {{ userProfile.user.fecha_creacion | date:'dd/MM/yyyy' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center p-4 bg-blue-50 rounded-lg">
+            <p class="text-3xl font-bold text-blue-600">{{ userProfile.stats?.total_tareas || 0 }}</p>
+            <p class="text-sm text-gray-600 mt-1">Total Tareas</p>
+          </div>
+          <div class="text-center p-4 bg-green-50 rounded-lg">
+            <p class="text-3xl font-bold text-green-600">{{ userProfile.stats?.tareas_completadas || 0 }}</p>
+            <p class="text-sm text-gray-600 mt-1">Completadas</p>
+          </div>
+          <div class="text-center p-4 bg-yellow-50 rounded-lg">
+            <p class="text-3xl font-bold text-yellow-600">{{ userProfile.stats?.tareas_en_progreso || 0 }}</p>
+            <p class="text-sm text-gray-600 mt-1">En Progreso</p>
+          </div>
+          <div class="text-center p-4 bg-red-50 rounded-lg">
+            <p class="text-3xl font-bold text-red-600">{{ userProfile.stats?.tareas_pendientes || 0 }}</p>
+            <p class="text-sm text-gray-600 mt-1">Pendientes</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editar Perfil -->
+      <div class="card">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Información Personal</h2>
+        <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+          <div class="mb-6">
+            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+              Nombre Completo
+            </label>
+            <input
+              id="nombre"
+              type="text"
+              formControlName="nombre"
+              class="input"
+              [class.border-red-500]="nombre?.invalid && nombre?.touched"
+            />
+            <p *ngIf="nombre?.invalid && nombre?.touched" class="mt-1 text-sm text-red-600">
+              <span *ngIf="nombre?.errors?.['required']">El nombre es obligatorio</span>
+              <span *ngIf="nombre?.errors?.['minlength']">Debe tener al menos 3 caracteres</span>
+            </p>
+          </div>
+
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Correo Electrónico
+            </label>
+            <input
+              type="email"
+              [value]="userProfile.user.email"
+              disabled
+              class="input bg-gray-100 cursor-not-allowed"
+            />
+            <p class="mt-1 text-xs text-gray-500">El correo electrónico no se puede cambiar</p>
+          </div>
+
+          <button type="submit" [disabled]="isUpdating" class="btn btn-primary">
+            <span *ngIf="!isUpdating">Guardar Cambios</span>
+            <span *ngIf="isUpdating" class="flex items-center">
+              <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Guardando...
+            </span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Cambiar Contraseña -->
+      <div class="card">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Cambiar Contraseña</h2>
+        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+          <!-- Contraseña Actual -->
+          <div class="mb-6">
+            <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">
+              Contraseña Actual
+            </label>
+            <div class="relative">
+              <input
+                id="currentPassword"
+                [type]="showCurrentPassword ? 'text' : 'password'"
+                formControlName="currentPassword"
+                class="input pr-10"
+                [class.border-red-500]="currentPassword?.invalid && currentPassword?.touched"
+              />
+              <button
+                type="button"
+                (click)="toggleCurrentPasswordVisibility()"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                <svg *ngIf="!showCurrentPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <svg *ngIf="showCurrentPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                </svg>
+              </button>
+            </div>
+            <p *ngIf="currentPassword?.invalid && currentPassword?.touched" class="mt-1 text-sm text-red-600">
+              La contraseña actual es obligatoria
+            </p>
+          </div>
+
+          <!-- Nueva Contraseña -->
+          <div class="mb-6">
+            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">
+              Nueva Contraseña
+            </label>
+            <div class="relative">
+              <input
+                id="newPassword"
+                [type]="showNewPassword ? 'text' : 'password'"
+                formControlName="newPassword"
+                class="input pr-10"
+                [class.border-red-500]="newPassword?.invalid && newPassword?.touched"
+              />
+              <button
+                type="button"
+                (click)="toggleNewPasswordVisibility()"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                <svg *ngIf="!showNewPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <svg *ngIf="showNewPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                </svg>
+              </button>
+            </div>
+            <p *ngIf="newPassword?.invalid && newPassword?.touched" class="mt-1 text-sm text-red-600">
+              <span *ngIf="newPassword?.errors?.['required']">La nueva contraseña es obligatoria</span>
+              <span *ngIf="newPassword?.errors?.['minlength']">Debe tener al menos 6 caracteres</span>
+            </p>
+          </div>
+
+          <!-- Confirmar Contraseña -->
+          <div class="mb-6">
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+              Confirmar Nueva Contraseña
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              formControlName="confirmPassword"
+              class="input"
+              [class.border-red-500]="(confirmPassword?.invalid && confirmPassword?.touched) || (passwordForm.errors?.['passwordMismatch'] && confirmPassword?.touched)"
+            />
+            <p *ngIf="confirmPassword?.invalid && confirmPassword?.touched" class="mt-1 text-sm text-red-600">
+              Debes confirmar la contraseña
+            </p>
+            <p *ngIf="passwordForm.errors?.['passwordMismatch'] && confirmPassword?.touched" class="mt-1 text-sm text-red-600">
+              Las contraseñas no coinciden
+            </p>
+          </div>
+
+          <button type="submit" [disabled]="isChangingPassword" class="btn btn-primary">
+            <span *ngIf="!isChangingPassword">Cambiar Contraseña</span>
+            <span *ngIf="isChangingPassword" class="flex items-center">
+              <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Cambiando...
+            </span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Zona de Peligro -->
+      <div class="card border-red-200">
+        <h2 class="text-xl font-semibold text-red-600 mb-4">Zona de Peligro</h2>
+        <p class="text-gray-600 mb-6">
+          Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor, asegúrate de que realmente quieres hacer esto.
+        </p>
+        <button (click)="deleteAccount()" class="btn btn-danger">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          Eliminar Cuenta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

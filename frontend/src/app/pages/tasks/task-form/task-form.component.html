@@ -1,0 +1,207 @@
+<div class="container-custom py-8">
+  <div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center space-x-4 mb-4">
+        <a routerLink="/tasks" class="text-gray-600 hover:text-gray-900">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">
+            {{ isEditMode ? 'Editar Tarea' : 'Nueva Tarea' }}
+          </h1>
+          <p class="text-gray-600 mt-1">{{ isEditMode ? 'Actualiza la información de tu tarea' : 'Completa el formulario para crear una tarea' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="card">
+      <!-- Mensaje de Error -->
+      <div *ngIf="errorMessage" class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg" role="alert">
+        <p class="text-sm">{{ errorMessage }}</p>
+      </div>
+
+      <!-- Título -->
+      <div class="mb-6">
+        <label for="titulo" class="block text-sm font-medium text-gray-700 mb-2">
+          Título <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="titulo"
+          type="text"
+          formControlName="titulo"
+          class="input"
+          [class.border-red-500]="titulo?.invalid && titulo?.touched"
+          placeholder="Ej: Completar informe mensual"
+        />
+        <p *ngIf="titulo?.invalid && titulo?.touched" class="mt-1 text-sm text-red-600">
+          <span *ngIf="titulo?.errors?.['required']">El título es obligatorio</span>
+          <span *ngIf="titulo?.errors?.['minlength']">Debe tener al menos 3 caracteres</span>
+        </p>
+      </div>
+
+      <!-- Descripción -->
+      <div class="mb-6">
+        <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">
+          Descripción
+        </label>
+        <textarea
+          id="descripcion"
+          formControlName="descripcion"
+          rows="4"
+          class="input resize-none"
+          placeholder="Describe los detalles de la tarea..."
+        ></textarea>
+      </div>
+
+      <!-- Grid de 2 columnas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Prioridad -->
+        <div>
+          <label for="prioridad" class="block text-sm font-medium text-gray-700 mb-2">
+            Prioridad <span class="text-red-500">*</span>
+          </label>
+          <select id="prioridad" formControlName="prioridad" class="input">
+            <option value="baja">🟢 Baja</option>
+            <option value="media">🟡 Media</option>
+            <option value="alta">🔴 Alta</option>
+            <option value="urgente">🔥 Urgente</option>
+          </select>
+        </div>
+
+        <!-- Fecha de Vencimiento -->
+        <div>
+          <label for="fecha_vencimiento" class="block text-sm font-medium text-gray-700 mb-2">
+            Fecha de Vencimiento
+          </label>
+          <input
+            id="fecha_vencimiento"
+            type="date"
+            formControlName="fecha_vencimiento"
+            class="input"
+          />
+        </div>
+      </div>
+
+      <!-- Enlace -->
+      <div class="mb-6">
+        <label for="enlace" class="block text-sm font-medium text-gray-700 mb-2">
+          Enlace Relacionado
+        </label>
+        <div class="relative">
+          <input
+            id="enlace"
+            type="url"
+            formControlName="enlace"
+            class="input pl-10"
+            placeholder="https://ejemplo.com"
+          />
+          <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Etiquetas -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Etiquetas
+        </label>
+        <div class="flex items-center space-x-2 mb-3">
+          <input
+            type="text"
+            [(ngModel)]="newEtiqueta"
+            [ngModelOptions]="{standalone: true}"
+            (keyup.enter)="addEtiqueta()"
+            class="input flex-1"
+            placeholder="Escribe una etiqueta y presiona Enter"
+          />
+          <button type="button" (click)="addEtiqueta()" class="btn btn-secondary">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Agregar
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <span *ngFor="let etiqueta of etiquetas; let i = index" 
+                class="inline-flex items-center bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm">
+            #{{ etiqueta }}
+            <button type="button" (click)="removeEtiqueta(i)" class="ml-2 text-primary-600 hover:text-primary-800">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Archivos -->
+      <div class="mb-6" *ngIf="!isEditMode">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Archivos Adjuntos
+        </label>
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-500 transition-colors">
+          <input
+            type="file"
+            (change)="onFileSelected($event)"
+            multiple
+            accept="image/*,.pdf,.doc,.docx,.txt"
+            class="hidden"
+            #fileInput
+          />
+          <button type="button" (click)="fileInput.click()" class="btn btn-secondary">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+            </svg>
+            Seleccionar Archivos
+          </button>
+          <p class="text-xs text-gray-500 mt-2">
+            Imágenes, PDF, Word, TXT (máx. 5MB cada uno)
+          </p>
+        </div>
+
+        <!-- Lista de Archivos Seleccionados -->
+        <div *ngIf="selectedFiles.length > 0" class="mt-4 space-y-2">
+          <div *ngFor="let file of selectedFiles; let i = index" 
+               class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+            <div class="flex items-center space-x-3">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-gray-900">{{ file.name }}</p>
+                <p class="text-xs text-gray-500">{{ (file.size / 1024 / 1024).toFixed(2) }} MB</p>
+              </div>
+            </div>
+            <button type="button" (click)="removeFile(i)" class="text-red-600 hover:text-red-800">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+        <a routerLink="/tasks" class="btn btn-secondary">
+          Cancelar
+        </a>
+        <button type="submit" [disabled]="isLoading" class="btn btn-primary">
+          <span *ngIf="!isLoading">{{ isEditMode ? 'Actualizar Tarea' : 'Crear Tarea' }}</span>
+          <span *ngIf="isLoading" class="flex items-center">
+            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Guardando...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

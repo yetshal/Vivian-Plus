@@ -1,0 +1,30 @@
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host {
+  display: block;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Hover en área de archivos */
+.border-dashed:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Transiciones suaves */
+input, textarea, select {
+  transition: all 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  transform: translateY(-1px);
+}
