@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { TaskService } from '../../../services/task.service';
+import { FolderService } from '../../../services/folder.service';
+import { Folder } from '../../../models/folder';
 
 @Component({
   selector: 'app-task-form',
@@ -14,6 +16,7 @@ import { TaskService } from '../../../services/task.service';
 export class TaskFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private taskService = inject(TaskService);
+  private folderService = inject(FolderService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -25,6 +28,7 @@ export class TaskFormComponent implements OnInit {
   selectedFiles: File[] = [];
   etiquetas: string[] = [];
   newEtiqueta = '';
+  folders: Folder[] = [];
 
   constructor() {
     this.taskForm = this.fb.group({
@@ -32,16 +36,37 @@ export class TaskFormComponent implements OnInit {
       descripcion: [''],
       prioridad: ['media', Validators.required],
       fecha_vencimiento: [''],
-      enlace: ['']
+      enlace: [''],
+      carpeta_id: ['']
     });
   }
 
   ngOnInit(): void {
+    this.loadFolders();
+    
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.isEditMode = true;
         this.taskId = +params['id'];
         this.loadTask();
+      }
+    });
+
+    // Si viene de una carpeta específica, preseleccionarla
+    this.route.queryParams.subscribe(queryParams => {
+      if (queryParams['folder']) {
+        this.taskForm.patchValue({ carpeta_id: +queryParams['folder'] });
+      }
+    });
+  }
+
+  loadFolders(): void {
+    this.folderService.getFolders().subscribe({
+      next: (response) => {
+        this.folders = response.folders;
+      },
+      error: (error) => {
+        console.error('Error al cargar carpetas:', error);
       }
     });
   }
@@ -58,7 +83,8 @@ export class TaskFormComponent implements OnInit {
           descripcion: task.descripcion,
           prioridad: task.prioridad,
           fecha_vencimiento: task.fecha_vencimiento,
-          enlace: task.enlace
+          enlace: task.enlace,
+          carpeta_id: task.carpeta_id || ''
         });
         this.etiquetas = task.etiquetas || [];
         this.isLoading = false;

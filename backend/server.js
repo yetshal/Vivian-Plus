@@ -8,6 +8,7 @@ const { testConnection } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const userRoutes = require('./routes/userRoutes');
+const folderRoutes = require('./routes/folderRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +25,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/folders', folderRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -34,7 +36,8 @@ app.get('/', (req, res) => {
       '/api/auth/register',
       '/api/auth/login',
       '/api/tasks',
-      '/api/users'
+      '/api/users',
+      '/api/folders'
     ]
   });
 });

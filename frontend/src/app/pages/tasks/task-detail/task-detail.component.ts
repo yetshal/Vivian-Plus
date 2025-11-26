@@ -129,4 +129,22 @@ export class TaskDetailComponent implements OnInit {
     };
     return icons[priority] || '⚪';
   }
+
+  getIconEmoji(icono: string): string {
+    const icons: { [key: string]: string } = {
+      'folder': '📁',
+      'briefcase': '💼',
+      'home': '🏠',
+      'book': '📚',
+      'code': '💻',
+      'heart': '❤️',
+      'star': '⭐',
+      'rocket': '🚀',
+      'camera': '📷',
+      'music': '🎵',
+      'gift': '🎁',
+      'target': '🎯'
+    };
+    return icons[icono || 'folder'] || '📁';
+  }
 }

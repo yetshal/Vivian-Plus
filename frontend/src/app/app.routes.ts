@@ -70,6 +70,30 @@ export const routes: Routes = [
     ]
   },
 
+  // Rutas de Carpetas (protegidas)
+  {
+    path: 'folders',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./pages/folders/folder-list/folder-list.component').then(m => m.FolderListComponent)
+      },
+      {
+        path: 'new',
+        loadComponent: () => import('./pages/folders/folder-form/folder-form.component').then(m => m.FolderFormComponent)
+      },
+      {
+        path: 'edit/:id',
+        loadComponent: () => import('./pages/folders/folder-form/folder-form.component').then(m => m.FolderFormComponent)
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./pages/folders/folder-detail/folder-detail.component').then(m => m.FolderDetailComponent)
+      }
+    ]
+  },
+
   // Ruta 404
   {
     path: '**',

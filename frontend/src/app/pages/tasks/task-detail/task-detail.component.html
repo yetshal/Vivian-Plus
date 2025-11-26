@@ -115,6 +115,29 @@
 
       <!-- Sidebar -->
       <div class="space-y-6">
+        <!-- Carpeta -->
+        <div *ngIf="task.carpeta_nombre" class="card">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Carpeta</h2>
+          <a 
+            [routerLink]="['/folders', task.carpeta_id]"
+            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <div 
+              class="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+              [style.background-color]="task.carpeta_color + '20'"
+            >
+              {{ getIconEmoji(task.carpeta_icono || 'folder') }}
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-900">{{ task.carpeta_nombre }}</p>
+              <p class="text-xs text-gray-500">Ver carpeta</p>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
         <!-- Acciones Rápidas -->
         <div class="card">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>

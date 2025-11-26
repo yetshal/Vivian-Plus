@@ -1,0 +1,129 @@
+<div class="container-custom py-8">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Mis Carpetas</h1>
+      <p class="text-gray-600 mt-2">Organiza tus tareas en carpetas temáticas</p>
+    </div>
+    <a routerLink="/folders/new" class="btn btn-primary mt-4 sm:mt-0">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      Nueva Carpeta
+    </a>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex items-center justify-center py-12">
+    <div class="text-center">
+      <svg class="animate-spin h-12 w-12 text-primary-600 mx-auto" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="mt-4 text-gray-600">Cargando carpetas...</p>
+    </div>
+  </div>
+
+  <!-- Carpetas -->
+  <div *ngIf="!isLoading">
+    <!-- Sin resultados -->
+    <div *ngIf="folders.length === 0" class="text-center py-12">
+      <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+      </svg>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">No tienes carpetas aún</h3>
+      <p class="text-gray-500 mb-4">Crea tu primera carpeta para organizar tus tareas</p>
+      <a routerLink="/folders/new" class="btn btn-primary">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Crear Carpeta
+      </a>
+    </div>
+
+    <!-- Grid de Carpetas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let folder of folders" 
+           [routerLink]="['/folders', folder.id]"
+           class="card hover:shadow-lg transition-all cursor-pointer group relative overflow-hidden">
+        
+        <!-- Barra de color -->
+        <div class="absolute top-0 left-0 right-0 h-1" [style.background-color]="folder.color"></div>
+
+        <!-- Header de la Carpeta -->
+        <div class="flex items-start justify-between mb-4 mt-2">
+          <div class="flex items-center space-x-3 flex-1">
+            <div 
+              class="w-14 h-14 rounded-lg flex items-center justify-center text-3xl transition-transform group-hover:scale-110"
+              [style.background-color]="folder.color + '20'"
+            >
+              {{ getIconEmoji(folder.icono) }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors truncate">
+                {{ folder.nombre }}
+              </h3>
+              <p *ngIf="folder.descripcion" class="text-sm text-gray-600 truncate">
+                {{ folder.descripcion }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Botón Eliminar -->
+          <button 
+            (click)="deleteFolder(folder.id, $event)"
+            class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            title="Eliminar carpeta"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="text-center p-3 bg-gray-50 rounded-lg">
+            <p class="text-2xl font-bold text-gray-900">{{ folder.total_tareas || 0 }}</p>
+            <p class="text-xs text-gray-600 mt-1">Total</p>
+          </div>
+          <div class="text-center p-3 bg-green-50 rounded-lg">
+            <p class="text-2xl font-bold text-green-600">{{ folder.tareas_completadas || 0 }}</p>
+            <p class="text-xs text-gray-600 mt-1">Listas</p>
+          </div>
+          <div class="text-center p-3 bg-yellow-50 rounded-lg">
+            <p class="text-2xl font-bold text-yellow-600">{{ (folder.total_tareas || 0) - (folder.tareas_completadas || 0) }}</p>
+            <p class="text-xs text-gray-600 mt-1">Pendientes</p>
+          </div>
+        </div>
+
+        <!-- Barra de Progreso -->
+        <div class="mb-2">
+          <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+            <span>Progreso</span>
+            <span class="font-semibold">{{ getCompletionPercentage(folder) }}%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              class="h-2 rounded-full transition-all duration-500"
+              [style.width.%]="getCompletionPercentage(folder)"
+              [style.background-color]="folder.color"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between pt-4 border-t border-gray-200 text-xs text-gray-500">
+          <span>Creada {{ folder.fecha_creacion | date:'dd/MM/yyyy' }}</span>
+          <a 
+            [routerLink]="['/folders/edit', folder.id]"
+            (click)="$event.stopPropagation()"
+            class="text-primary-600 hover:text-primary-700 font-medium"
+          >
+            Editar
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

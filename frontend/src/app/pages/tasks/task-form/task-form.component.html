@@ -86,6 +86,20 @@
         </div>
       </div>
 
+      <!-- Carpeta -->
+      <div class="mb-6">
+        <label for="carpeta_id" class="block text-sm font-medium text-gray-700 mb-2">
+          Carpeta
+        </label>
+        <select id="carpeta_id" formControlName="carpeta_id" class="input">
+          <option value="">Sin carpeta</option>
+          <option *ngFor="let folder of folders" [value]="folder.id">
+            {{ folder.nombre }}
+          </option>
+        </select>
+        <p class="mt-1 text-xs text-gray-500">Organiza tu tarea en una carpeta temática</p>
+      </div>
+
       <!-- Enlace -->
       <div class="mb-6">
         <label for="enlace" class="block text-sm font-medium text-gray-700 mb-2">

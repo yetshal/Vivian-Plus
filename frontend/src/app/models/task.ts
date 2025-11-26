@@ -4,6 +4,10 @@ export type TaskPriority = 'baja' | 'media' | 'alta' | 'urgente';
 export interface Task {
   id: number;
   usuario_id: number;
+  carpeta_id?: number;
+  carpeta_nombre?: string;
+  carpeta_color?: string;
+  carpeta_icono?: string;
   titulo: string;
   descripcion?: string;
   estado: TaskStatus;
@@ -25,6 +29,7 @@ export interface CreateTaskRequest {
   fecha_vencimiento?: string;
   enlace?: string;
   etiquetas?: string[];
+  carpeta_id?: number;
 }
 
 export interface UpdateTaskRequest {
@@ -34,6 +39,7 @@ export interface UpdateTaskRequest {
   estado?: TaskStatus;
   fecha_vencimiento?: string;
   enlace?: string;
+  carpeta_id?: number;
 }
 
 export interface TasksResponse {

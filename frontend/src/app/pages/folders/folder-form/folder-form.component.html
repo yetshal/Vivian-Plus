@@ -1,0 +1,134 @@
+<div class="container-custom py-8">
+  <div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center space-x-4 mb-4">
+        <a routerLink="/folders" class="text-gray-600 hover:text-gray-900">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">
+            {{ isEditMode ? 'Editar Carpeta' : 'Nueva Carpeta' }}
+          </h1>
+          <p class="text-gray-600 mt-1">{{ isEditMode ? 'Actualiza la información de tu carpeta' : 'Crea una carpeta para organizar tus tareas' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="folderForm" (ngSubmit)="onSubmit()" class="card">
+      <!-- Mensaje de Error -->
+      <div *ngIf="errorMessage" class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg" role="alert">
+        <p class="text-sm">{{ errorMessage }}</p>
+      </div>
+
+      <!-- Vista Previa -->
+      <div class="mb-6 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+        <p class="text-sm font-medium text-gray-700 mb-3">Vista Previa</p>
+        <div class="flex items-center space-x-4">
+          <div 
+            class="w-16 h-16 rounded-lg flex items-center justify-center text-4xl"
+            [style.background-color]="(color?.value || '#3B82F6') + '20'"
+          >
+            {{ getSelectedIconEmoji() }}
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">{{ nombre?.value || 'Nombre de la carpeta' }}</h3>
+            <p class="text-sm text-gray-600">{{ descripcion?.value || 'Descripción de la carpeta' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nombre -->
+      <div class="mb-6">
+        <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+          Nombre de la Carpeta <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="nombre"
+          type="text"
+          formControlName="nombre"
+          class="input"
+          [class.border-red-500]="nombre?.invalid && nombre?.touched"
+          placeholder="Ej: Proyectos Personales"
+        />
+        <p *ngIf="nombre?.invalid && nombre?.touched" class="mt-1 text-sm text-red-600">
+          <span *ngIf="nombre?.errors?.['required']">El nombre es obligatorio</span>
+          <span *ngIf="nombre?.errors?.['minlength']">Debe tener al menos 3 caracteres</span>
+        </p>
+      </div>
+
+      <!-- Descripción -->
+      <div class="mb-6">
+        <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">
+          Descripción
+        </label>
+        <textarea
+          id="descripcion"
+          formControlName="descripcion"
+          rows="3"
+          class="input resize-none"
+          placeholder="Describe el propósito de esta carpeta..."
+        ></textarea>
+      </div>
+
+      <!-- Selección de Icono -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-3">
+          Icono <span class="text-red-500">*</span>
+        </label>
+        <div class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-2">
+          <button
+            *ngFor="let icon of availableIcons"
+            type="button"
+            (click)="selectIcon(icon.name)"
+            [class.ring-2]="icono?.value === icon.name"
+            [class.ring-primary-600]="icono?.value === icon.name"
+            class="p-3 rounded-lg border-2 border-gray-200 hover:border-primary-300 transition-all flex items-center justify-center text-2xl"
+            [title]="icon.label"
+          >
+            {{ icon.emoji }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Selección de Color -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-3">
+          Color <span class="text-red-500">*</span>
+        </label>
+        <div class="grid grid-cols-5 sm:grid-cols-10 gap-3">
+          <button
+            *ngFor="let colorOption of availableColors"
+            type="button"
+            (click)="selectColor(colorOption.value)"
+            [class.ring-4]="color?.value === colorOption.value"
+            [class.ring-offset-2]="color?.value === colorOption.value"
+            class="w-12 h-12 rounded-lg transition-all hover:scale-110"
+            [style.background-color]="colorOption.value"
+            [title]="colorOption.name"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+        <a routerLink="/folders" class="btn btn-secondary">
+          Cancelar
+        </a>
+        <button type="submit" [disabled]="isLoading" class="btn btn-primary">
+          <span *ngIf="!isLoading">{{ isEditMode ? 'Actualizar Carpeta' : 'Crear Carpeta' }}</span>
+          <span *ngIf="isLoading" class="flex items-center">
+            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Guardando...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

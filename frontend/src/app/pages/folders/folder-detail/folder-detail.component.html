@@ -1,0 +1,226 @@
+<div class="container-custom py-8">
+  <!-- Loading State -->
+  <div *ngIf="isLoading && !folder" class="flex items-center justify-center py-12">
+    <div class="text-center">
+      <svg class="animate-spin h-12 w-12 text-primary-600 mx-auto" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="mt-4 text-gray-600">Cargando carpeta...</p>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="folder">
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-8">
+      <div class="flex items-start space-x-4 flex-1">
+        <a routerLink="/folders" class="text-gray-600 hover:text-gray-900 mt-1">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+        </a>
+        <div class="flex items-center space-x-4 flex-1">
+          <div 
+            class="w-20 h-20 rounded-lg flex items-center justify-center text-5xl"
+            [style.background-color]="folder.color + '20'"
+          >
+            {{ getIconEmoji(folder.icono) }}
+          </div>
+          <div class="flex-1">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ folder.nombre }}</h1>
+            <p *ngIf="folder.descripcion" class="text-gray-600">{{ folder.descripcion }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex items-center space-x-2">
+        <a [routerLink]="['/folders/edit', folder.id]" class="btn btn-secondary">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          Editar
+        </a>
+        <button (click)="deleteFolder()" class="btn btn-danger">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          Eliminar
+        </button>
+      </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <!-- Total Tareas -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 font-medium">Total de Tareas</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ folder.total_tareas || 0 }}</p>
+          </div>
+          <div class="w-12 h-12 rounded-lg flex items-center justify-center" [style.background-color]="folder.color + '20'">
+            <svg class="w-6 h-6" [style.color]="folder.color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completadas -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 font-medium">Completadas</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">{{ folder.tareas_completadas || 0 }}</p>
+          </div>
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- En Progreso -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 font-medium">En Progreso</p>
+            <p class="text-3xl font-bold text-blue-600 mt-2">{{ folder.tareas_en_progreso || 0 }}</p>
+          </div>
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pendientes -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 font-medium">Pendientes</p>
+            <p class="text-3xl font-bold text-yellow-600 mt-2">{{ folder.tareas_pendientes || 0 }}</p>
+          </div>
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progreso -->
+    <div class="card mb-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Progreso de la Carpeta</h3>
+      <div class="flex items-center space-x-4">
+        <div class="flex-1">
+          <div class="w-full bg-gray-200 rounded-full h-4">
+            <div 
+              class="h-4 rounded-full transition-all duration-500"
+              [style.width.%]="getCompletionPercentage()"
+              [style.background-color]="folder.color"
+            ></div>
+          </div>
+        </div>
+        <span class="text-2xl font-bold" [style.color]="folder.color">{{ getCompletionPercentage() }}%</span>
+      </div>
+      <p class="text-sm text-gray-600 mt-2">
+        Has completado {{ folder.tareas_completadas || 0 }} de {{ folder.total_tareas || 0 }} tareas
+      </p>
+    </div>
+
+    <!-- Tareas de la Carpeta -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-semibold text-gray-900">Tareas en esta Carpeta</h3>
+        <a [routerLink]="['/tasks/new']" [queryParams]="{folder: folder.id}" class="btn btn-primary btn-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Nueva Tarea
+        </a>
+      </div>
+
+      <!-- Loading Tareas -->
+      <div *ngIf="isLoading" class="text-center py-8">
+        <svg class="animate-spin h-8 w-8 text-primary-600 mx-auto" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-4 text-gray-600">Cargando tareas...</p>
+      </div>
+
+      <!-- Sin tareas -->
+      <div *ngIf="!isLoading && tasks.length === 0" class="text-center py-8">
+        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        </svg>
+        <p class="text-gray-500 mb-4">Esta carpeta no tiene tareas aún</p>
+        <a [routerLink]="['/tasks/new']" [queryParams]="{folder: folder.id}" class="btn btn-primary">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Crear Primera Tarea
+        </a>
+      </div>
+
+      <!-- Lista de Tareas -->
+      <div *ngIf="!isLoading && tasks.length > 0" class="space-y-3">
+        <div *ngFor="let task of tasks" 
+             [routerLink]="['/tasks', task.id]"
+             class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer group">
+          <!-- Header de la Tarea -->
+          <div class="flex items-start justify-between mb-3">
+            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors flex-1 mr-2">
+              {{ task.titulo }}
+            </h4>
+            <div class="flex items-center space-x-1">
+              <button 
+                *ngIf="task.estado !== 'completada'"
+                (click)="completeTask(task.id, $event)"
+                class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                title="Completar tarea"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </button>
+              <button 
+                (click)="deleteTask(task.id, $event)"
+                class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Eliminar tarea"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Descripción -->
+          <p *ngIf="task.descripcion" class="text-gray-600 text-sm mb-3 line-clamp-2">
+            {{ task.descripcion }}
+          </p>
+
+          <!-- Badges y Meta -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span [class]="'badge ' + getPriorityClass(task.prioridad)">
+              {{ getPriorityText(task.prioridad) }}
+            </span>
+            <span [class]="'badge ' + getStatusClass(task.estado)">
+              {{ getStatusText(task.estado) }}
+            </span>
+            <span *ngIf="task.fecha_vencimiento" class="text-xs text-gray-500">
+              📅 {{ task.fecha_vencimiento | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

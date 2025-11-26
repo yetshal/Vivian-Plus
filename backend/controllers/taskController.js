@@ -58,11 +58,15 @@ const getTaskById = async (req, res) => {
     
     const [tasks] = await pool.query(
       `SELECT t.*, 
+              c.nombre as carpeta_nombre,
+              c.color as carpeta_color,
+              c.icono as carpeta_icono,
               GROUP_CONCAT(DISTINCT et.nombre) as etiquetas,
               GROUP_CONCAT(DISTINCT a.nombre_archivo) as archivos,
               GROUP_CONCAT(DISTINCT a.ruta_archivo) as rutas_archivos,
               GROUP_CONCAT(DISTINCT a.id) as archivos_ids
        FROM tareas t
+       LEFT JOIN carpetas c ON t.carpeta_id = c.id
        LEFT JOIN tarea_etiquetas te ON t.id = te.tarea_id
        LEFT JOIN etiquetas et ON te.etiqueta_id = et.id
        LEFT JOIN archivos a ON t.id = a.tarea_id
@@ -103,7 +107,7 @@ const getTaskById = async (req, res) => {
 // Crear nueva tarea
 const createTask = async (req, res) => {
   try {
-    const { titulo, descripcion, prioridad, fecha_vencimiento, enlace, etiquetas } = req.body;
+    const { titulo, descripcion, prioridad, fecha_vencimiento, enlace, etiquetas, carpeta_id } = req.body;
     
     if (!titulo) {
       return res.status(400).json({ 
@@ -113,9 +117,9 @@ const createTask = async (req, res) => {
     
     // Insertar tarea
     const [result] = await pool.query(
-      `INSERT INTO tareas (usuario_id, titulo, descripcion, prioridad, fecha_vencimiento, enlace) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [req.userId, titulo, descripcion || null, prioridad || 'media', fecha_vencimiento || null, enlace || null]
+      `INSERT INTO tareas (usuario_id, carpeta_id, titulo, descripcion, prioridad, fecha_vencimiento, enlace) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [req.userId, carpeta_id || null, titulo, descripcion || null, prioridad || 'media', fecha_vencimiento || null, enlace || null]
     );
     
     const tareaId = result.insertId;
@@ -178,7 +182,7 @@ const createTask = async (req, res) => {
 const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const { titulo, descripcion, prioridad, estado, fecha_vencimiento, enlace } = req.body;
+    const { titulo, descripcion, prioridad, estado, fecha_vencimiento, enlace, carpeta_id } = req.body;
     
     // Verificar que la tarea existe y pertenece al usuario
     const [existing] = await pool.query(
@@ -224,6 +228,10 @@ const updateTask = async (req, res) => {
     if (enlace !== undefined) {
       updates.push('enlace = ?');
       values.push(enlace);
+    }
+    if (carpeta_id !== undefined) {
+      updates.push('carpeta_id = ?');
+      values.push(carpeta_id || null);
     }
     
     if (updates.length === 0) {
