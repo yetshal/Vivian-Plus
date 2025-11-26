@@ -60,7 +60,8 @@ const getTaskById = async (req, res) => {
       `SELECT t.*, 
               GROUP_CONCAT(DISTINCT et.nombre) as etiquetas,
               GROUP_CONCAT(DISTINCT a.nombre_archivo) as archivos,
-              GROUP_CONCAT(DISTINCT a.ruta_archivo) as rutas_archivos
+              GROUP_CONCAT(DISTINCT a.ruta_archivo) as rutas_archivos,
+              GROUP_CONCAT(DISTINCT a.id) as archivos_ids
        FROM tareas t
        LEFT JOIN tarea_etiquetas te ON t.id = te.tarea_id
        LEFT JOIN etiquetas et ON te.etiqueta_id = et.id
@@ -76,11 +77,17 @@ const getTaskById = async (req, res) => {
       });
     }
     
+    // Procesar las rutas de archivos para que sean accesibles desde el frontend
     const task = {
       ...tasks[0],
       etiquetas: tasks[0].etiquetas ? tasks[0].etiquetas.split(',') : [],
       archivos: tasks[0].archivos ? tasks[0].archivos.split(',') : [],
-      rutas_archivos: tasks[0].rutas_archivos ? tasks[0].rutas_archivos.split(',') : []
+      rutas_archivos: tasks[0].rutas_archivos ? tasks[0].rutas_archivos.split(',').map(ruta => {
+        // Extraer solo el nombre del archivo de la ruta completa
+        const fileName = ruta.split('\\').pop().split('/').pop();
+        return fileName;
+      }) : [],
+      archivos_ids: tasks[0].archivos_ids ? tasks[0].archivos_ids.split(',') : []
     };
     
     res.json({ task });
@@ -204,6 +211,11 @@ const updateTask = async (req, res) => {
     if (estado !== undefined) {
       updates.push('estado = ?');
       values.push(estado);
+      
+      // Si se marca como completada, agregar fecha_completada
+      if (estado === 'completada') {
+        updates.push('fecha_completada = NOW()');
+      }
     }
     if (fecha_vencimiento !== undefined) {
       updates.push('fecha_vencimiento = ?');
