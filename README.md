@@ -44,7 +44,7 @@ Siga estos pasos para instalar y ejecutar la aplicación web **Vivian+**.
 1.  Abra su terminal y navegue al directorio donde desea guardar el proyecto.
 2.  Clone el repositorio oficial de Vivian+:
     ```bash
-    git clone [https://github.com/yetshal/vivian-plus.git](https://github.com/yetshal/vivian-plus.git)
+    git clone https://github.com/yetshal/vivian-plus.git
     cd vivian-plus
     ```
 
