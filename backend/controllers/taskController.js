@@ -115,11 +115,18 @@ const createTask = async (req, res) => {
       });
     }
     
+    // Formatear fecha si existe
+    let formattedDate = null;
+    if (fecha_vencimiento) {
+      const date = new Date(fecha_vencimiento);
+      formattedDate = date.toISOString().split('T')[0];
+    }
+    
     // Insertar tarea
     const [result] = await pool.query(
       `INSERT INTO tareas (usuario_id, carpeta_id, titulo, descripcion, prioridad, fecha_vencimiento, enlace) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [req.userId, carpeta_id || null, titulo, descripcion || null, prioridad || 'media', fecha_vencimiento || null, enlace || null]
+      [req.userId, carpeta_id || null, titulo, descripcion || null, prioridad || 'media', formattedDate, enlace || null]
     );
     
     const tareaId = result.insertId;
@@ -182,7 +189,7 @@ const createTask = async (req, res) => {
 const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const { titulo, descripcion, prioridad, estado, fecha_vencimiento, enlace, carpeta_id } = req.body;
+    const { titulo, descripcion, prioridad, estado, fecha_vencimiento, enlace, carpeta_id, etiquetas } = req.body;
     
     // Verificar que la tarea existe y pertenece al usuario
     const [existing] = await pool.query(
@@ -223,7 +230,14 @@ const updateTask = async (req, res) => {
     }
     if (fecha_vencimiento !== undefined) {
       updates.push('fecha_vencimiento = ?');
-      values.push(fecha_vencimiento);
+      // Convertir fecha ISO a formato DATE de MySQL (YYYY-MM-DD)
+      if (fecha_vencimiento) {
+        const date = new Date(fecha_vencimiento);
+        const formattedDate = date.toISOString().split('T')[0];
+        values.push(formattedDate);
+      } else {
+        values.push(null);
+      }
     }
     if (enlace !== undefined) {
       updates.push('enlace = ?');
@@ -234,18 +248,49 @@ const updateTask = async (req, res) => {
       values.push(carpeta_id || null);
     }
     
-    if (updates.length === 0) {
+    if (updates.length === 0 && !etiquetas) {
       return res.status(400).json({ 
         message: 'No se proporcionaron campos para actualizar' 
       });
     }
     
-    values.push(id);
+    // Actualizar tarea si hay cambios
+    if (updates.length > 0) {
+      values.push(id);
+      await pool.query(
+        `UPDATE tareas SET ${updates.join(', ')} WHERE id = ?`,
+        values
+      );
+    }
     
-    await pool.query(
-      `UPDATE tareas SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
+    // Actualizar etiquetas si se proporcionaron
+    if (etiquetas && Array.isArray(etiquetas)) {
+      // Eliminar etiquetas existentes
+      await pool.query('DELETE FROM tarea_etiquetas WHERE tarea_id = ?', [id]);
+      
+      // Agregar nuevas etiquetas
+      for (const nombreEtiqueta of etiquetas) {
+        // Buscar o crear etiqueta
+        let [etiqueta] = await pool.query(
+          'SELECT id FROM etiquetas WHERE nombre = ? AND usuario_id = ?',
+          [nombreEtiqueta, req.userId]
+        );
+        
+        if (etiqueta.length === 0) {
+          const [nuevaEtiqueta] = await pool.query(
+            'INSERT INTO etiquetas (nombre, usuario_id) VALUES (?, ?)',
+            [nombreEtiqueta, req.userId]
+          );
+          etiqueta = [{ id: nuevaEtiqueta.insertId }];
+        }
+        
+        // Relacionar etiqueta con tarea
+        await pool.query(
+          'INSERT INTO tarea_etiquetas (tarea_id, etiqueta_id) VALUES (?, ?)',
+          [id, etiqueta[0].id]
+        );
+      }
+    }
     
     res.json({ message: 'Tarea actualizada exitosamente' });
   } catch (error) {

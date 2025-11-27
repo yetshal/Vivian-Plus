@@ -46,7 +46,7 @@ CREATE TABLE `tareas` (
   KEY `idx_carpeta` (`carpeta_id`),
   CONSTRAINT `tareas_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `tareas_ibfk_2` FOREIGN KEY (`carpeta_id`) REFERENCES `carpetas` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -55,7 +55,7 @@ CREATE TABLE `tareas` (
 
 LOCK TABLES `tareas` WRITE;
 /*!40000 ALTER TABLE `tareas` DISABLE KEYS */;
-INSERT INTO `tareas` VALUES (1,1,NULL,'Completar documentación del proyecto','Finalizar la documentación técnica de Vivian+','en_progreso','alta','2025-11-27',NULL,'2025-11-20 13:55:21','2025-11-20 13:55:21',NULL),(2,1,NULL,'Revisar código del backend','Hacer code review de las funcionalidades implementadas','pendiente','media','2025-11-23',NULL,'2025-11-20 13:55:21','2025-11-20 13:55:21',NULL),(3,1,NULL,'Preparar presentación final','Crear slides para la presentación del proyecto','pendiente','urgente','2025-11-22',NULL,'2025-11-20 13:55:21','2025-11-20 13:55:21',NULL),(12,2,6,'Test 1','Test','pendiente','urgente','2025-11-20','https://x.com/home','2025-11-26 20:42:30','2025-11-26 20:45:38','2025-11-26 20:43:33');
+INSERT INTO `tareas` VALUES (1,1,NULL,'Completar documentación del proyecto','Finalizar la documentación técnica de Vivian+','en_progreso','alta','2025-11-27',NULL,'2025-11-20 13:55:21','2025-11-20 13:55:21',NULL),(2,1,NULL,'Revisar código del backend','Hacer code review de las funcionalidades implementadas','pendiente','media','2025-11-23',NULL,'2025-11-20 13:55:21','2025-11-20 13:55:21',NULL),(3,1,NULL,'Preparar presentación final','Crear slides para la presentación del proyecto','pendiente','urgente','2025-11-22',NULL,'2025-11-20 13:55:21','2025-11-20 13:55:21',NULL),(12,2,6,'Finalizar el proyecto',':p','completada','urgente','2025-11-27','','2025-11-26 20:42:30','2025-11-27 01:27:46','2025-11-27 01:26:14'),(13,2,NULL,'Test','Test descripcion','pendiente','baja','2025-11-28','https://www.youtube.com/','2025-11-26 21:06:00','2025-11-27 01:27:13',NULL),(15,3,NULL,'Test 2',':p','pendiente','media','2025-11-27',NULL,'2025-11-27 01:28:55','2025-11-27 01:28:55',NULL);
 /*!40000 ALTER TABLE `tareas` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -68,4 +68,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-26 15:48:30
+-- Dump completed on 2025-11-26 20:31:25
